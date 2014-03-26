@@ -47,4 +47,13 @@ class ContatoTable {
         return $row;
     }
 
+    public function deletar($id)
+    {
+        $delete = $this->_tableGateway
+                       ->getSql()
+                       ->delete()
+                       ->where(array('id'=>$id));
+        
+        return $this->_tableGateway->deleteWith($delete);
+    }
 }

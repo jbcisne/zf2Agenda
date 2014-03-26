@@ -161,11 +161,15 @@ class ContatosController extends AbstractActionController {
             // adicionar mensagem de erro
             $this->flashMessenger()->addMessage("Contato não encotrado");
         } else {
-            // aqui vai a lógica para deletar o contato no banco
-            // 1 - solicitar serviço para pegar o model responsável pelo delete
-            // 2 - deleta contato
-            // adicionar mensagem de sucesso
-            $this->flashMessenger()->addSuccessMessage("Contato de ID $id deletado com sucesso");
+            try {
+                    $this->_getContatoTable()->deletar($id);
+                    
+                    // adicionar mensagem de sucesso
+                    $this->flashMessenger()->addSuccessMessage("Contato de ID $id deletado com sucesso");
+                } catch (\Exception $exc) {
+                    // adicionar mensagem
+                    $this->flashMessenger()->addErrorMessage($exc->getMessage());
+                }
         }
 
         // redirecionar para action index
