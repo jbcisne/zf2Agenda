@@ -4,7 +4,6 @@ namespace Contato\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
-use Contato\Model\ContatoTable;
 
 class ContatosController extends AbstractActionController {
 
@@ -156,10 +155,9 @@ class ContatosController extends AbstractActionController {
         // filtra id passsado pela url
         $id = (int) $this->params()->fromRoute('id', 0);
 
-        // se id = 0 ou não informado redirecione para contatos
-        if (!$id) {
+        if (!$this->_getContatoTable()->find($id)) {
             // adicionar mensagem de erro
-            $this->flashMessenger()->addMessage("Contato não encotrado");
+            $this->flashMessenger()->addMessage("Não foi encontrado contado de id = {$id}");
         } else {
             try {
                     $this->_getContatoTable()->deletar($id);

@@ -40,9 +40,9 @@ class ContatoTable {
         $id = (int) $id;
         $rowset = $this->_tableGateway->select(array('id' => $id));
         $row = $rowset->current();
-        if (!$row) {
-            throw new \Exception("Não foi encontrado contado de id = {$id}");
-        }
+//        if (!$row) {
+//            throw new \Exception("Não foi encontrado contado de id = {$id}");
+//        }
 
         return $row;
     }
