@@ -9,7 +9,7 @@ namespace Contato\Controller;
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
 
-// import Zend\Db
+/* import Zend\Db */
 //use Zend\Db\Adapter\Adapter as AdaptadorAlias,
 //    Zend\Db\Sql\Sql,
 //    Zend\Db\ResultSet\ResultSet;
