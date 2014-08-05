@@ -6,7 +6,15 @@ $(function () {
     var corpo_alert = $("#alert-message");
 
     // verificar se o elemente esta presente na pagina
-    if (corpo_alert.length)
+    if (corpo_alert.length){
         // gerar efeito para o elemento encontrado na pagina
         corpo_alert.fadeOut().fadeIn().fadeOut().fadeIn();
+    }
+    
+    // mascara para telefone: (xx)xxxx-xxxxx
+    $("input#inputTelefonePrincipal, input#inputTelefoneSecundario").mask("(99)9999-9999?9");
+    
+    // mascara para captcha com 12 caracteres apenas alfabéticos: xxxxxxxxxxxx
+    $("input#inputCaptcha").mask("aaaaaaaaaaaa");
+    
 });

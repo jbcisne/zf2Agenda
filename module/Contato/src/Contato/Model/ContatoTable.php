@@ -47,13 +47,63 @@ class ContatoTable {
         return $row;
     }
 
-    public function deletar($id)
+    public function delete($id)
     {
-        $delete = $this->_tableGateway
-                       ->getSql()
-                       ->delete()
-                       ->where(array('id'=>$id));
+        return $this->_tableGateway->delete(array('id'=>$id));
         
-        return $this->_tableGateway->deleteWith($delete);
+        # OU
+        
+//        $delete = $this->_tableGateway
+//                       ->getSql()
+//                       ->delete()
+//                       ->where(array('id'=>$id));
+//        
+//        return $this->_tableGateway->deleteWith($delete);
     }
+    
+    /**
+    * Inserir um novo contato
+    * 
+    * @param \Contato\Model\Contato $contato
+    * @return 1/0
+    */
+   public function save(Contato $contato)
+   {
+       $timeNow = new \DateTime();
+
+       $data = [
+           'nome'                  => $contato->nome,
+           'telefone_principal'    => $contato->telefone_principal,
+           'telefone_secundario'   => $contato->telefone_secundario,
+           'data_criacao'          => $timeNow->format('Y-m-d H:i:s'), 
+           'data_atualizacao'      => $timeNow->format('Y-m-d H:i:s'), # data de criação igual a de atualização 
+       ];
+
+       return $this->_tableGateway->insert($data);
+   }
+   
+   /**
+    * Atualizar um contato existente
+    * 
+    * @param \Contato\Model\Contato $contato
+    * @throws \Exception
+    */
+   public function update(Contato $contato)
+   {
+       $timeNow = new \DateTime();
+
+       $data = [
+           'nome'                  => $contato->nome,
+           'telefone_principal'    => $contato->telefone_principal,
+           'telefone_secundario'   => $contato->telefone_secundario, 
+           'data_atualizacao'      => $timeNow->format('Y-m-d H:i:s'),
+       ];
+
+       $id = (int) $contato->id;
+       if ($this->find($id)) {
+           $this->_tableGateway->update($data, array('id' => $id));
+       } else {
+           throw new \Exception("Contato #{$id} {$contato->nome} inexistente");
+       }
+   }
 }
