@@ -2,8 +2,10 @@
 
 namespace Contato\Controller;
 
-use Zend\Mvc\Controller\AbstractActionController;
-use Zend\View\Model\ViewModel;
+use Zend\Mvc\Controller\AbstractActionController,
+    Zend\View\Model\ViewModel,
+    Contato\Form\ContatoForm;
+    
 
 class ContatosController extends AbstractActionController {
 
@@ -29,7 +31,7 @@ class ContatosController extends AbstractActionController {
 
     // GET /contatos/novo
     public function novoAction() {
-
+        return [ 'formContato' => new ContatoForm() ];
     }
 
     // POST /contatos/adicionar
