@@ -6,20 +6,21 @@ use Zend\Mvc\Controller\AbstractActionController,
     Zend\View\Model\ViewModel,
     Contato\Form\ContatoForm,
     Contato\Model\Contato;
-    
 
-class ContatosController extends AbstractActionController {
+class ContatosController extends AbstractActionController
+{
 
     protected $_contatoTable;
-    
+
     /**
      * Metodo privado para obter instacia do Model ContatoTable
      *
      * @return \Contato\Model\ContatoTable
      */
-    private function _getContatoTable() {
+    private function _getContatoTable ()
+    {
         // adicionar service ModelContato a variavel de classe
-        if (!$this->_contatoTable){
+        if (!$this->_contatoTable) {
             $this->_contatoTable = $this->getServiceLocator()->get('ContatoTable');
         }
         // return vairavel de classe com service ModelContato
@@ -27,17 +28,38 @@ class ContatosController extends AbstractActionController {
     }
 
     // GET /contatos
-    public function indexAction() {
-        return new ViewModel(array('contatos' => $this->_getContatoTable()->fetchAll()));
+    public function indexAction ()
+    {
+        // colocar parametros da url em um array
+        $paramsUrl = [
+            'pagina_atual'  => $this->params()->fromQuery('pagina', 1),
+            'itens_pagina'  => $this->params()->fromQuery('itens_pagina', 10),
+            'coluna_nome'   => $this->params()->fromQuery('coluna_nome', 'nome'),
+            'coluna_sort'   => $this->params()->fromQuery('coluna_sort', 'ASC'),
+            'search'        => $this->params()->fromQuery('search', null),
+        ];
+
+        // configuar método de paginação
+        $pagination = $this->_getContatoTable()->fetchPaginator(
+            /* $pagina */           $paramsUrl['pagina_atual'],
+            /* $itensPagina */      $paramsUrl['itens_pagina'],
+            /* $ordem */            "{$paramsUrl['coluna_nome']} {$paramsUrl['coluna_sort']}",
+            /* $search */           $paramsUrl['search'],
+            /* $itensPaginacao */   5
+        );
+
+        return new ViewModel(['contatos' => $pagination] + $paramsUrl);
     }
 
     // GET /contatos/novo
-    public function novoAction() {
-        return [ 'formContato' => new ContatoForm() ];
+    public function novoAction ()
+    {
+        return [ 'formContato' => new ContatoForm()];
     }
 
     // POST /contatos/adicionar
-    public function adicionarAction() {
+    public function adicionarAction ()
+    {
         // obtém a requisição
         $request = $this->getRequest();
 
@@ -52,7 +74,7 @@ class ContatosController extends AbstractActionController {
             $contatoForm->setInputFilter($contatoModel->getInputFilter());
             //passa para o obj form os dados vindos do post
             $contatoForm->setData($request->getPost());
-            
+
             // verifica se o formulário segue a validação proposta
             if ($contatoForm->isValid()) {
                 // aqui vai a lógica para adicionar os dados à tabela no banco
@@ -60,7 +82,7 @@ class ContatosController extends AbstractActionController {
                 $contatoModel->exchangeArray($contatoForm->getData());
                 // 2 - inserir dados no banco pelo model
                 $this->_getContatoTable()->save($contatoModel);
-                
+
                 // adicionar mensagem de sucesso
                 $this->flashMessenger()
                         ->addSuccessMessage("Contato criado com sucesso");
@@ -71,14 +93,15 @@ class ContatosController extends AbstractActionController {
                 // renderiza para action novo com o objeto form populado,
                 // com isso os erros serão tratados pelo helpers view
                 return (new ViewModel())
-                        ->setVariable('formContato', $contatoForm)
-                        ->setTemplate('contato/contatos/novo');
+                                ->setVariable('formContato', $contatoForm)
+                                ->setTemplate('contato/contatos/novo');
             }
         }
     }
 
     // GET /contatos/detalhes/id
-    public function detalhesAction() {
+    public function detalhesAction ()
+    {
         // filtra id passsado pela url
         $id = (int) $this->params()->fromRoute('id', 0);
 
@@ -106,7 +129,8 @@ class ContatosController extends AbstractActionController {
     }
 
     // GET /contatos/editar/id
-    public function editarAction() {
+    public function editarAction ()
+    {
         // filtra id passsado pela url
         $id = (int) $this->params()->fromRoute('id', 0);
 
@@ -139,19 +163,20 @@ class ContatosController extends AbstractActionController {
     }
 
     // PUT /contatos/editar/id
-    public function atualizarAction() {
+    public function atualizarAction ()
+    {
         // obtém a requisição
         $request = $this->getRequest();
 
         // verifica se a requisição é do tipo post
         if ($request->isPost()) {
-            
-            $contatoForm  = new ContatoForm();
+
+            $contatoForm = new ContatoForm();
             $contatoModel = new Contato();
-            
+
             $contatoForm->setInputFilter($contatoModel->getInputFilter())
-                        ->setData($request->getPost());
-            
+                    ->setData($request->getPost());
+
             // verifica se o formulário segue a validação proposta
             if ($contatoForm->isValid()) {
                 // aqui vai a lógica para editar os dados à tabela no banco
@@ -169,29 +194,30 @@ class ContatosController extends AbstractActionController {
                 // renderiza para action editar com o objeto form populado,
                 // com isso os erros serão tratados pelo helpers view
                 return (new ViewModel())
-                            ->setVariable('formContato', $contatoForm)
-                            ->setTemplate('contato/contatos/editar');
+                                ->setVariable('formContato', $contatoForm)
+                                ->setTemplate('contato/contatos/editar');
             }
         }
     }
 
     // DELETE /contatos/deletar/id
-    public function deletarAction() {
+    public function deletarAction ()
+    {
         // filtra id passsado pela url
         $id = (int) $this->params()->fromRoute('id', 0);
         $contato = $this->_getContatoTable()->find($id);
-        
+
         if (!$contato) {
             // adicionar mensagem de erro
             $this->flashMessenger()
-                 ->addMessage("Não foi encontrado contado de id = {$id}");
+                    ->addMessage("Não foi encontrado contado de id = {$id}");
         } else {
             try {
                 $this->_getContatoTable()->delete($contato->id);
 
                 // adicionar mensagem de sucesso
                 $this->flashMessenger()
-                     ->addSuccessMessage("Contato <b>{$contato->nome}</b> deletado com sucesso");
+                        ->addSuccessMessage("Contato <b>{$contato->nome}</b> deletado com sucesso");
             } catch (\Exception $exc) {
                 // adicionar mensagem
                 $this->flashMessenger()->addErrorMessage($exc->getMessage());

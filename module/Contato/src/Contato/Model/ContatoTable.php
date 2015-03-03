@@ -5,9 +5,15 @@
 namespace Contato\Model;
 
 // import Zend\Db
-use Zend\Db\TableGateway\TableGateway;
+use Zend\Db\TableGateway\TableGateway,
+    Zend\Db\Sql\Select,
+    Zend\Db\ResultSet\HydratingResultSet,
+    Zend\Stdlib\Hydrator\Reflection,
+    Zend\Paginator\Adapter\DbSelect,
+    Zend\Paginator\Paginator;
 
-class ContatoTable {
+class ContatoTable
+{
 
     protected $_tableGateway;
 
@@ -16,7 +22,8 @@ class ContatoTable {
      *
      * @param \Zend\Db\TableGateway\TableGateway $tableGateway
      */
-    public function __construct(TableGateway $tableGateway) {
+    public function __construct (TableGateway $tableGateway)
+    {
         $this->_tableGateway = $tableGateway;
     }
 
@@ -25,7 +32,8 @@ class ContatoTable {
      *
      * @return \Zend\Db\ResultSet\ResultSet
      */
-    public function fetchAll() {
+    public function fetchAll ()
+    {
         return $this->_tableGateway->select();
     }
 
@@ -36,7 +44,8 @@ class ContatoTable {
      * @return \Model\Contato
      * @throws \Exception
      */
-    public function find($id) {
+    public function find ($id)
+    {
         $id = (int) $id;
         $rowset = $this->_tableGateway->select(array('id' => $id));
         $row = $rowset->current();
@@ -47,63 +56,92 @@ class ContatoTable {
         return $row;
     }
 
-    public function delete($id)
+    public function delete ($id)
     {
-        return $this->_tableGateway->delete(array('id'=>$id));
-        
+        return $this->_tableGateway->delete(array('id' => $id));
+
         # OU
-        
 //        $delete = $this->_tableGateway
 //                       ->getSql()
 //                       ->delete()
 //                       ->where(array('id'=>$id));
-//        
+//
 //        return $this->_tableGateway->deleteWith($delete);
     }
-    
+
     /**
-    * Inserir um novo contato
-    * 
-    * @param \Contato\Model\Contato $contato
-    * @return 1/0
-    */
-   public function save(Contato $contato)
-   {
-       $timeNow = new \DateTime();
+     * Inserir um novo contato
+     *
+     * @param \Contato\Model\Contato $contato
+     * @return 1/0
+     */
+    public function save (Contato $contato)
+    {
+        $timeNow = new \DateTime();
 
-       $data = [
-           'nome'                  => $contato->nome,
-           'telefone_principal'    => $contato->telefone_principal,
-           'telefone_secundario'   => $contato->telefone_secundario,
-           'data_criacao'          => $timeNow->format('Y-m-d H:i:s'), 
-           'data_atualizacao'      => $timeNow->format('Y-m-d H:i:s'), # data de criação igual a de atualização 
-       ];
+        $data = [
+            'nome' => $contato->nome,
+            'telefone_principal' => $contato->telefone_principal,
+            'telefone_secundario' => $contato->telefone_secundario,
+            'data_criacao' => $timeNow->format('Y-m-d H:i:s'),
+            'data_atualizacao' => $timeNow->format('Y-m-d H:i:s'), # data de criação igual a de atualização
+        ];
 
-       return $this->_tableGateway->insert($data);
-   }
-   
-   /**
-    * Atualizar um contato existente
-    * 
-    * @param \Contato\Model\Contato $contato
-    * @throws \Exception
-    */
-   public function update(Contato $contato)
-   {
-       $timeNow = new \DateTime();
+        return $this->_tableGateway->insert($data);
+    }
 
-       $data = [
-           'nome'                  => $contato->nome,
-           'telefone_principal'    => $contato->telefone_principal,
-           'telefone_secundario'   => $contato->telefone_secundario, 
-           'data_atualizacao'      => $timeNow->format('Y-m-d H:i:s'),
-       ];
+    /**
+     * Atualizar um contato existente
+     *
+     * @param \Contato\Model\Contato $contato
+     * @throws \Exception
+     */
+    public function update (Contato $contato)
+    {
+        $timeNow = new \DateTime();
 
-       $id = (int) $contato->id;
-       if ($this->find($id)) {
-           $this->_tableGateway->update($data, array('id' => $id));
-       } else {
-           throw new \Exception("Contato #{$id} {$contato->nome} inexistente");
-       }
-   }
+        $data = [
+            'nome' => $contato->nome,
+            'telefone_principal' => $contato->telefone_principal,
+            'telefone_secundario' => $contato->telefone_secundario,
+            'data_atualizacao' => $timeNow->format('Y-m-d H:i:s'),
+        ];
+
+        $id = (int) $contato->id;
+        if ($this->find($id)) {
+            $this->_tableGateway->update($data, array('id' => $id));
+        } else {
+            throw new \Exception("Contato #{$id} {$contato->nome} inexistente");
+        }
+    }
+
+    /**
+     * Localizar itens por paginação
+     *
+     * @param int $page
+     * @param int $itemPerPage
+     * @param string|array $order
+     * @param string $like
+     * @param int $itemPerPagitation
+     * @return Paginator
+     */
+    public function fetchPaginator ($page = 1, $itemPerPage = 10, $order = 'nome ASC', $like = null, $itemPerPagitation = 5)
+    {
+        $select = (new Select('contatos'))->order($order);
+        if (isset($like)) {
+            $select->where->like('id', "%{$like}%")
+                   ->or->like('nome', "%{$like}%")
+                   ->or->like('telefone_principal', "%{$like}%")
+                   ->or->like('data_criacao', "%{$like}%")
+            ;
+        }
+        $resultSet = new HydratingResultSet(new Reflection(), new Contato());
+        $paginatorAdapter = new DbSelect(
+                $select, $this->_tableGateway->getAdapter(), $resultSet
+        );
+        return (new Paginator($paginatorAdapter))
+                ->setCurrentPageNumber((int) $page)
+                ->setItemCountPerPage((int) $itemPerPage)
+                ->setPageRange((int) $itemPerPagitation);
+    }
 }
