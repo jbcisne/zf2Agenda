@@ -79,13 +79,13 @@ class ContatoTable
     {
         $timeNow = new \DateTime();
 
-        $data = [
+        $data = array(
             'nome' => $contato->nome,
             'telefone_principal' => $contato->telefone_principal,
             'telefone_secundario' => $contato->telefone_secundario,
             'data_criacao' => $timeNow->format('Y-m-d H:i:s'),
             'data_atualizacao' => $timeNow->format('Y-m-d H:i:s'), # data de criação igual a de atualização
-        ];
+        );
 
         return $this->_tableGateway->insert($data);
     }
@@ -100,12 +100,12 @@ class ContatoTable
     {
         $timeNow = new \DateTime();
 
-        $data = [
+        $data = array(
             'nome' => $contato->nome,
             'telefone_principal' => $contato->telefone_principal,
             'telefone_secundario' => $contato->telefone_secundario,
             'data_atualizacao' => $timeNow->format('Y-m-d H:i:s'),
-        ];
+        );
 
         $id = (int) $contato->id;
         if ($this->find($id)) {
@@ -127,7 +127,8 @@ class ContatoTable
      */
     public function fetchPaginator ($page = 1, $itemPerPage = 10, $order = 'nome ASC', $like = null, $itemPerPagitation = 5)
     {
-        $select = (new Select('contatos'))->order($order);
+        $objSelect = new Select('contatos');
+        $select = $objSelect->order($order);
         if (isset($like)) {
             $select->where->like('id', "%{$like}%")
                    ->or->like('nome', "%{$like}%")
@@ -139,7 +140,13 @@ class ContatoTable
         $paginatorAdapter = new DbSelect(
                 $select, $this->_tableGateway->getAdapter(), $resultSet
         );
-        return (new Paginator($paginatorAdapter))
+        //php 5.4
+//        return (new Paginator($paginatorAdapter))
+//                ->setCurrentPageNumber((int) $page)
+//                ->setItemCountPerPage((int) $itemPerPage)
+//                ->setPageRange((int) $itemPerPagitation);
+        $paginator = new Paginator($paginatorAdapter);
+        return $paginator
                 ->setCurrentPageNumber((int) $page)
                 ->setItemCountPerPage((int) $itemPerPage)
                 ->setPageRange((int) $itemPerPagitation);

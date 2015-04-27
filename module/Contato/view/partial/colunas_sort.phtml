@@ -1,10 +1,13 @@
 <?php
-$estruturaColuna = function($label, $coluna_nome) {
-    $html = '';
-    $html .= "<a href='{$this->url('contatos', ['action' => 'index'], ['query' => ['pagina' => $this->pagina_atual, 'coluna_nome' => $coluna_nome, 'coluna_sort' => ($this->coluna_nome != $coluna_nome ? 'ASC' : ($this->coluna_sort == 'DESC' ? 'ASC' : 'DESC')), 'itens_pagina' => $this->itens_pagina, 'search' => $this->search]])}'>";
 
-    if ($this->coluna_nome == $coluna_nome) {
-        $icon = $this->coluna_sort == 'ASC' ? '' : '-alt';
+$view = $this;
+$estruturaColuna = function($label, $coluna_nome) use ($view){
+    $html = '';
+//php5.4    $html .= "<a href='{$this->url('contatos', ['action' => 'index'], ['query' => ['pagina' => $this->pagina_atual, 'coluna_nome' => $coluna_nome, 'coluna_sort' => ($this->coluna_nome != $coluna_nome ? 'ASC' : ($this->coluna_sort == 'DESC' ? 'ASC' : 'DESC')), 'itens_pagina' => $this->itens_pagina, 'search' => $this->search]])}'>";
+    $html .= "<a href='{$view->url('contatos', array('action' => 'index'), array('query' => array('pagina' => $view->pagina_atual, 'coluna_nome' => $coluna_nome, 'coluna_sort' => ($view->coluna_nome != $coluna_nome ? 'ASC' : ($view->coluna_sort == 'DESC' ? 'ASC' : 'DESC')), 'itens_pagina' => $view->itens_pagina, 'search' => $view->search)))}'>";
+
+    if ($view->coluna_nome == $coluna_nome) {
+        $icon = $view->coluna_sort == 'ASC' ? '' : '-alt';
         $html .= "<span class='glyphicon glyphicon-sort-by-attributes{$icon}'></span> ";
     }
 

@@ -4,7 +4,7 @@ $urlPaginator = function($pagina) {
     $query = $uri->getQueryAsArray();
     $query['pagina'] = $pagina;
 
-    return $this->url($this->route, [], ['query' => $query]);
+    return $this->url($this->route, array(), array('query' => $query));
 };
 ?>
 

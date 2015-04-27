@@ -31,13 +31,13 @@ class ContatosController extends AbstractActionController
     public function indexAction ()
     {
         // colocar parametros da url em um array
-        $paramsUrl = [
+        $paramsUrl = array(
             'pagina_atual'  => $this->params()->fromQuery('pagina', 1),
             'itens_pagina'  => $this->params()->fromQuery('itens_pagina', 10),
             'coluna_nome'   => $this->params()->fromQuery('coluna_nome', 'nome'),
             'coluna_sort'   => $this->params()->fromQuery('coluna_sort', 'ASC'),
             'search'        => $this->params()->fromQuery('search', null),
-        ];
+        );
 
         // configuar método de paginação
         $pagination = $this->_getContatoTable()->fetchPaginator(
@@ -48,13 +48,15 @@ class ContatosController extends AbstractActionController
             /* $itensPaginacao */   5
         );
 
-        return new ViewModel(['contatos' => $pagination] + $paramsUrl);
+//        return new ViewModel(['contatos' => $pagination] + $paramsUrl);
+        return new ViewModel(array('contatos' => $pagination) + $paramsUrl);
     }
 
     // GET /contatos/novo
     public function novoAction ()
     {
-        return [ 'formContato' => new ContatoForm()];
+//        return [ 'formContato' => new ContatoForm()];
+        return array( 'formContato' => new ContatoForm());
     }
 
     // POST /contatos/adicionar
@@ -92,7 +94,14 @@ class ContatosController extends AbstractActionController
             } else {
                 // renderiza para action novo com o objeto form populado,
                 // com isso os erros serão tratados pelo helpers view
-                return (new ViewModel())
+                // php 5.4
+//                return (new ViewModel())
+//                                ->setVariable('formContato', $contatoForm)
+//                                ->setTemplate('contato/contatos/novo');
+
+
+                $view = new ViewModel();
+                return $view
                                 ->setVariable('formContato', $contatoForm)
                                 ->setTemplate('contato/contatos/novo');
             }
@@ -125,7 +134,8 @@ class ContatosController extends AbstractActionController
         }
 
         // dados eviados para detalhes.phtml
-        return ['contato' => $contato];
+//        return ['contato' => $contato];
+        return array('contato' => $contato);
     }
 
     // GET /contatos/editar/id
@@ -159,7 +169,8 @@ class ContatosController extends AbstractActionController
         $form->setData($contato);
 
         // dados eviados para editar.phtml
-        return ['formContato' => $form];
+//        return ['formContato' => $form];
+        return array('formContato' => $form);
     }
 
     // PUT /contatos/editar/id
@@ -193,7 +204,12 @@ class ContatosController extends AbstractActionController
             } else {
                 // renderiza para action editar com o objeto form populado,
                 // com isso os erros serão tratados pelo helpers view
-                return (new ViewModel())
+                // php5.4
+//                return (new ViewModel())
+//                                ->setVariable('formContato', $contatoForm)
+//                                ->setTemplate('contato/contatos/editar');
+                $view = new ViewModel();
+                return $view
                                 ->setVariable('formContato', $contatoForm)
                                 ->setTemplate('contato/contatos/editar');
             }
