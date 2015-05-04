@@ -151,4 +151,35 @@ class ContatoTable
                 ->setItemCountPerPage((int) $itemPerPage)
                 ->setPageRange((int) $itemPerPagitation);
     }
+
+    /**
+     * Localizar contatos pelo nome
+     *
+     * @param type $nome
+     * @return type Array
+     */
+    public function search($nome)
+    {
+        // preparar objeto SQL
+        $adapter = $this->_tableGateway->getAdapter();
+        $sql     = new \Zend\Db\Sql\Sql($adapter);
+
+        // montagem do select com where, like e limit para tabela contatos
+//        $select = (new Select('contatos'))->limit(8); //php 5.4
+        $select = new Select('contatos');
+        $select->limit(8);
+        
+        $select
+                ->columns(array('id', 'nome'))
+                ->where
+                ->like('nome', "%{$nome}%")
+
+        ;
+
+        // executar select
+        $statement = $sql->getSqlStringForSqlObject($select);
+        $results   = $adapter->query($statement, $adapter::QUERY_MODE_EXECUTE);
+
+        return $results;
+    }
 }

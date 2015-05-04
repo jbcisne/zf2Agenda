@@ -11,6 +11,7 @@ class ContatosController extends AbstractActionController
 {
 
     protected $_contatoTable;
+    private $_prefixCacheName = 'nome_cache_contato_';
 
     /**
      * Metodo privado para obter instacia do Model ContatoTable
@@ -124,7 +125,17 @@ class ContatosController extends AbstractActionController
         }
 
         try {
-            $contato = $this->_getContatoTable()->find($id);
+            // lógica cache objeto contatos
+            $nome_cache_contato_id = $this->_prefixCacheName . $id;
+
+            if (!$this->cache()->hasItem($nome_cache_contato_id)) {
+                $contato = $this->_getContatoTable()->find($id);
+
+                $this->cache()->setItem($nome_cache_contato_id, $contato);
+            } else {
+                $contato = $this->cache()->getItem($nome_cache_contato_id);
+            }
+
         } catch (\Exception $exc) {
             // adicionar mensagem
             $this->flashMessenger()->addErrorMessage($exc->getMessage());
@@ -134,8 +145,12 @@ class ContatosController extends AbstractActionController
         }
 
         // dados eviados para detalhes.phtml
-//        return ['contato' => $contato];
-        return array('contato' => $contato);
+        $viewModel = new ViewModel();
+        return $viewModel
+                    //garante que action possa ser chamada via post e ajax
+                    ->setTerminal($this->getRequest()->isXmlHttpRequest())
+                    ->setVariable('contato', $contato)
+        ;
     }
 
     // GET /contatos/editar/id
@@ -199,6 +214,11 @@ class ContatosController extends AbstractActionController
                 $this->flashMessenger()
                         ->addSuccessMessage("Contato editado com sucesso");
 
+                $nome_cache_contato_id = $this->_prefixCacheName . $contatoModel->id;
+                if ($this->cache()->hasItem($nome_cache_contato_id)) {
+                    $this->cache()->removeItem($nome_cache_contato_id);
+                }
+
                 // redirecionar para action detalhes
                 return $this->redirect()->toRoute('contatos', array("action" => "detalhes", "id" => $contatoModel->id,));
             } else {
@@ -242,6 +262,19 @@ class ContatosController extends AbstractActionController
 
         // redirecionar para action index
         return $this->redirect()->toRoute('contatos');
+    }
+
+    // GET /contatos/search?query=[nome]
+    public function searchAction()
+    {
+        $nome = $this->params()->fromQuery('query', null);
+        if (isset($nome)) {
+            $result = $this->_getContatoTable()->search($nome);
+        } else  {
+            $result = array();   // ou []
+        }
+
+        return new \Zend\View\Model\JsonModel($result);
     }
 
 }

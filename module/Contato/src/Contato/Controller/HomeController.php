@@ -21,14 +21,15 @@ class HomeController extends AbstractActionController {
      * @return \Zend\View\Model\ViewModel
      */
     public function indexAction() {
-//        /**
-//         * função anônima para var_dump estilizado
-//         */
-//        $myVarDump = function($nome_linha = "Nome da Linha", $data = null, $caracter = ' - ') {
-//            echo str_repeat($caracter, 100) . '<br/>' . ucwords($nome_linha) . '<pre><br/>';
-//            var_dump($data);
-//            echo '</pre>' . str_repeat($caracter, 100) . '<br/><br/>';
-//        };
+
+        /**
+         * função anônima para var_dump estilizado
+         */
+        $myVarDump = function($nome_linha = "Nome da Linha", $data = null, $caracter = ' - ') {
+            echo str_repeat($caracter, 100) . '<br/>' . ucwords($nome_linha) . '<pre><br/>';
+            var_dump($data);
+            echo '</pre>' . str_repeat($caracter, 100) . '<br/><br/>';
+        };
 //
 //        /**
 //         * conexão com banco
@@ -72,6 +73,19 @@ class HomeController extends AbstractActionController {
 //                "Resultado do Objeto Sql para Array ", $resultSet->toArray()
 //        );
 //        die();
+//
+//        if (!$this->cache()->hasItem('nome')) {
+//            $myVarDump(
+//                "Registro de Cache Agora",
+//                $this->cache()->setItem('nome', 'igor')
+//            );
+//        } else {
+//            $myVarDump(
+//                "Cache Existente",
+//                $this->cache()->getItem('nome')
+//            );
+//        }
+
 
 
 
